@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>One-Line API</title>
+
+    <link rel="stylesheet" href="index.css">
+
+    <style>
+        section {
+            padding-left: 20px;
+          }
+          h2 {
+            text-decoration: underline;
+          }
+          h3,
+          p {
+            margin-left: 20px;
+          }
+          
+          p {
+            font-size: 20px;
+          }</style>
+  </head>
+
+  <body>
+    <header>
+      <h1>Server is UP and running at:    </h1>
+      <h2>
+          <a href=`https://one-line-a-day-backend.herokuapp.com/`>`https://one-line-a-day-backend.herokuapp.com/`</a>
+        </h2>
+          
+    </header>
+
+    <section>
+        <h2>
+            ENDPOINTS:
+        </h2>
+        <h3>Note: Authorization tokens last 60minutes.</h3>
+        <section>
+            <h2>POST - `/api/users/register` -</h2>
+            <h3>required body: {username, email, password}</h3>
+            <h3>response: {message, id, token}</h3>   
+        </section>
+
+        <section>
+            <h2>POST - `/api/users/login` -</h2>
+            <h3>required body: {username, password}</h3>
+            <h3>response: {message, username, token}</h3>
+            <p>    note: username key will work with both matching username or email value for account.</p>
+        </section>
+
+        <section>
+           <h2> GET - `/api/lines` -</h2>
+            <h3>required headers: {Authorization: token}</h3>
+            <h3>Response: {lines: [ {line, date, id} ] }</h3>
+        </section>
+
+        <section>
+            <h2>GET - `/api/lines/YYYY-MM-DD` -</h2>
+                <h3>required headers: {Authorization: token}</h3>
+                <h3>Response: {line, date, id}</h3>
+                
+            <p>note: (please use leading 0s for days/months 1-9)</p>
+        </section>
+
+        <section>
+                <h2>POST - `/api/lines` -</h2>
+                <h3>required headers: {Authorization: token}</h3>
+                <h3>required body: {line, date: 'YYYY-MM-DD' }</h3>
+                <h3>response: {message, id}</h3>
+        </section>
+
+    </section>
+    
+    <section>
+        <h2>EXISTING DATA:</h2>
+
+        <section>
+            <h2>Test Users:</h2>
+
+
+            <section>
+                <h3>username: TestUser1</h3>
+                <h3>email: 'fake@fake.fake'</h3>
+                <h3>password: 'pass'</h3>
+            </section>
+
+            <section>
+                    <h3>username: TestUser2</h3>
+                    <h3>email: 'test@fake.fake'</h3>
+                    <h3>password: 'pass'</h3>
+            </section>
+
+
+        </section>
+
+        <section>
+            <h2>Test Lines:</h2>
+            <p>Test Lines:  Lines for both test users have been added for dates: Jan/Feb, 1st-9th, 2009-2019</p>
+        </section>
+    </section>
+  </body>
+</html>
