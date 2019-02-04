@@ -4,7 +4,7 @@
   "description": "Back-end for One Line A Day project.",
   "main": "index.js",
   "scripts": {
-    "test": "cross-env DB_ENV=testing jest --watch --verbose",
+    "test": "cross-env DB_ENV=testing jest --watchAll --verbose",
     "server": "cross-env DB_ENV=testing nodemon index.js",
     "start": "node index.js"
   },
