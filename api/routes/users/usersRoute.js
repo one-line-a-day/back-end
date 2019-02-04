@@ -75,8 +75,6 @@ function generateToken(user) {
 
 // routes
 
-// TODO - TOKENS
-
 router.post("/register", checkRegistration, hashPassword, async (req, res) => {
   let ids = await db("users").insert(req.body);
 
