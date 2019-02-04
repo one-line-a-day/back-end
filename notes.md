@@ -28,7 +28,7 @@ required headers: {Authorization: token},
 required body: {line, date: 'YYYY-MM-DD' },
 response: {message, id}
 
-Existing Data:
+EXISTING DATA:
 
     Test Users:
 
