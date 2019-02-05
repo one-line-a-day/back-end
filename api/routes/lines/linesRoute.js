@@ -59,6 +59,11 @@ router.get("/testcall", async (req, res) => {
   res.status(200).json(lines);
 });
 
+router.post("/testcall", async (req, res) => {
+  let ids = await db("lines").insert(req.body);
+  res.status(201).json({ message: "created line successfully", id: ids[0] });
+});
+
 router.get("/testcall/:date", async (req, res) => {
   let lines = await db("lines")
     .join("users", "users.id", "=", "lines.user_id")
