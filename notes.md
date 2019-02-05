@@ -28,6 +28,11 @@ required headers: {Authorization: token},
 required body: {line, date: 'YYYY-MM-DD' },
 response: {message, id}
 
+PATCH - `/api/lines` -
+required headers: {Authoerization: token},
+required body: {id, (optional: line and/or date)}
+response: {updatedLine}
+
 EXISTING DATA:
 
     Test Users:
