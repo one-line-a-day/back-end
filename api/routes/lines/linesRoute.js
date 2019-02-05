@@ -99,11 +99,17 @@ router.post("/", authenticate, async (req, res) => {
     .json({ message: "line created successfully", id: lineIDs[0] });
 });
 
-// router.patch('/', authenticate, async (req,res) => {
-//   let { id } = await db("users")
-//   .where({ username: req.decoded.username })
-//   .first();
-// })
+router.patch("/", authenticate, async (req, res) => {
+  let userID = await db("users")
+    .where({ username: req.decoded.username })
+    .first();
+  userID = userID.id;
+
+  let updated = await db("lines")
+    .where({ id: req.body.id })
+    .update(req.body);
+  res.status(200).json(updated);
+});
 
 //query routes to add search functionality
 
