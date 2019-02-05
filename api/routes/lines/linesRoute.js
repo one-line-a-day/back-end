@@ -108,12 +108,14 @@ router.patch("/", authenticate, async (req, res) => {
     .first();
   userID = userID.id;
 
-  let line = await db("lines").where({ id: req.body.id });
+  let line = await db("lines")
+    .where({ id: req.body.id })
+    .first();
 
   if (line.user_id !== userID) {
     res
       .status(401)
-      .json({ message: "access denied: line does not belong to user" });
+      .json({ message: `access denied: line does not belong to user` });
   } else {
     await db("lines")
       .where({ id: req.body.id })
@@ -127,7 +129,28 @@ router.patch("/", authenticate, async (req, res) => {
   }
 });
 
-router.delete("/", authenticate, async (req, res) => {});
+router.delete("/", authenticate, async (req, res) => {
+  let userID = await db("users")
+    .where({ username: req.decoded.username })
+    .first();
+  userID = userID.id;
+
+  let line = await db("lines")
+    .where({ id: req.body.id })
+    .first();
+
+  if (line.user_id !== userID) {
+    res
+      .status(401)
+      .json({ message: "access denied: line does not belong to user" });
+  } else {
+    await db("lines")
+      .where({ id: req.body.id })
+      .del();
+
+    res.status(200).json({ message: "line deleted successfully" });
+  }
+});
 
 //query routes to add search functionality
 
