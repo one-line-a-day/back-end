@@ -98,7 +98,7 @@
         <section>
            <h2> GET - `/api/lines` -</h2>
             <h3>required headers: {Authorization: token}</h3>
-            <h3>Response: {lines: [ {line, date, id} ] }</h3>
+            <h3>Response: [ lines ] </h3>
         </section>
 
         <section>
@@ -107,6 +107,12 @@
                 <h3>Response: {line, date, id}</h3>
                 
             <p>note: (please use leading 0s for days/months 1-9)</p>
+        </section>
+
+        <section>
+            <h2>GET - `/api/lines/month/MM/year/YYYY`-</h2>
+            <h3>required headers: {Authorization: token}</h3>
+            <h3>Response: [ lines ]</h3>
         </section>
 
         <section>

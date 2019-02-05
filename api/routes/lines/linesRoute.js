@@ -1,28 +1,10 @@
 const express = require("express");
 const router = express.Router();
-// const jwt = require("jsonwebtoken");
 const db = require("../../../data/dbConfig");
 
 const auth = require("../../auth/auth");
-// const jwtKey = process.env.JWT_SECRET;
+
 //middleware functions
-// function auth.authenticate(req, res, next) {
-//   const token = req.get("Authorization");
-
-//   if (token) {
-//     jwt.verify(token, jwtKey, (err, decoded) => {
-//       if (err) return res.status(401).json(err);
-
-//       req.decoded = decoded;
-
-//       next();
-//     });
-//   } else {
-//     return res.status(401).json({
-//       error: "No token provided, must be set on the Authorization Header"
-//     });
-//   }
-// }
 
 //routes
 router.get("/", auth.authenticate, async (req, res) => {
@@ -31,7 +13,7 @@ router.get("/", auth.authenticate, async (req, res) => {
     .where({ "users.username": req.decoded.username })
     .select("line", "date", "lines.id", "img_url");
 
-  res.status(200).json({ lines });
+  res.status(200).json(lines);
 });
 
 //------TEST CALLS TO REMOVE:
@@ -88,6 +70,15 @@ router.get("/:date", auth.authenticate, async (req, res) => {
   res.status(200).json(lines);
 });
 
+router.get("/month/:month/year/:year", auth.authenticate, async (req, res) => {
+  let lines = await db("lines")
+    .join("users", "users.id", "=", "lines.user_id")
+    .where({ "users.username": req.decoded.username })
+    .andWhereRaw(`strftime('%m', date) = ?`, [req.params.month])
+    .andWhereRaw(`strftime('%Y', date) = ?`, [req.params.year])
+    .select("line", "date", "lines.id", "img_url");
+  res.status(200).json(lines);
+});
 //todo handle if line for date already exists
 router.post("/", auth.authenticate, async (req, res) => {
   //todo just put userID on the token...

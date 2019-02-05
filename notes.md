@@ -28,13 +28,17 @@ note: deleting a user deletes all corresponding lines.
 
 GET - `/api/lines` -
 required headers: {Authorization: token}
-Response: {lines: [ {line, date, id} ] }
+Response: [ {line, date, id, img_url} ]
 
 GET - `/api/lines/YYYY-MM-DD` -
 required headers: {Authorization: token}
 Response: {line, date, id}
 
     note: (please use leading 0s for days/months 1-9)
+
+GET - `/api/lines/month/MM/year/YYYY`
+required headers: {Authorization: token}
+Response: [ lines ]
 
 POST - `/api/lines` -
 required headers: {Authorization: token},
