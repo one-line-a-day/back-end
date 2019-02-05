@@ -98,4 +98,9 @@ router.post("/login", checkLogin, findUser, checkPassword, async (req, res) => {
   }
 });
 
+router.get("/testcall", async (req, res) => {
+  let users = await db("users");
+  res.status(200).json(users);
+});
+
 module.exports = router;

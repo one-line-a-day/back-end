@@ -38,6 +38,25 @@
         <h2>
             ENDPOINTS:
         </h2>
+        <section>
+            <h2>Temporary - no token requirement</h2>
+            <section>
+                <h2>GET - `/api/users/testcall` </h2>
+                <h3>response: [users] </h3>
+            </section>
+            <section>
+                <h2>GET = `/api/lines/testcall`</h2>
+                <h3>response: [lines]</h3>
+            </section>
+            <section>
+                <h2>GET - `/api/lines/testcall/YYYY-MM-DD</h2>
+                <h3>response: [lines]</h3>
+            </section>
+            <section>
+                <h2>POST - `/api/lines/testcall`</h2>
+                <h3>required body: {user_id, line, date(YYYY-MM-DD)}</h3>
+            </section>
+        </section>
         <h3>Note: Authorization tokens last 60minutes.</h3>
         <section>
             <h2>POST - `/api/users/register` -</h2>
