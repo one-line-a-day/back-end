@@ -1,11 +1,12 @@
+//supertest breaks down if dotenv not included here for JWT secret
 require("dotenv").config();
 
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const db = require("../../../data/dbConfig");
 
+const db = require("../../../data/dbConfig");
+const auth = require("../../auth/auth");
 //middleware functions
 function checkRegistration(req, res, next) {
   if (!req.body.username || !req.body.email || !req.body.password) {
@@ -58,21 +59,6 @@ function checkPassword(req, res, next) {
   }
 }
 
-function generateToken(user) {
-  const payload = {
-    username: user.username,
-    email: user.email
-  };
-
-  const secret = process.env.JWT_SECRET;
-
-  const options = {
-    expiresIn: "60m"
-  };
-
-  return jwt.sign(payload, secret, options);
-}
-
 // routes
 
 router.post("/register", checkRegistration, hashPassword, async (req, res) => {
@@ -82,7 +68,7 @@ router.post("/register", checkRegistration, hashPassword, async (req, res) => {
     .where({ id: ids[0] })
     .first();
 
-  let token = generateToken(user);
+  let token = auth.generateToken(user);
 
   res
     .status(201)
@@ -91,7 +77,7 @@ router.post("/register", checkRegistration, hashPassword, async (req, res) => {
 
 router.post("/login", checkLogin, findUser, checkPassword, async (req, res) => {
   if (req.user) {
-    let token = generateToken(req.user);
+    let token = auth.generateToken(req.user);
     res
       .status(200)
       .json({ message: "login success", username: req.user.username, token });
@@ -101,6 +87,48 @@ router.post("/login", checkLogin, findUser, checkPassword, async (req, res) => {
 router.get("/testcall", async (req, res) => {
   let users = await db("users");
   res.status(200).json(users);
+});
+
+//TODO - check bad body data. error try to change user ID
+router.patch("/", auth.authenticate, async (req, res) => {
+  let userID = await db("users")
+    .where({ username: req.decoded.username })
+    .first();
+  userID = userID.id;
+
+  if (req.body.password) {
+    req.body.password = bcrypt.hashSync(req.body.password, 12);
+  }
+
+  await db("users")
+    .where({ username: req.decoded.username })
+    .update(req.body);
+
+  let updatedUser = await db("users")
+    .where({ id: userID })
+    .select("username", "email", "name")
+    .first();
+
+  res.status(200).json(updatedUser);
+});
+
+router.delete("/", auth.authenticate, async (req, res) => {
+  let userID = await db("users")
+    .where({ username: req.decoded.username })
+    .first();
+  userID = userID.id;
+
+  await db("users")
+    .where({ id: userID })
+    .del();
+
+  await db("lines")
+    .where({ user_id: userID })
+    .del();
+
+  res
+    .status(200)
+    .json({ message: `user and corresponding entries successfully deleted` });
 });
 
 module.exports = router;

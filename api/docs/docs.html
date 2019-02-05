@@ -15,13 +15,13 @@
           h2 {
             text-decoration: underline;
           }
-          h3,
-          p {
+          h3 {
             margin-left: 20px;
           }
           
           p {
-            font-size: 20px;
+              margin-left: 5px;
+            font-size: 18px;
           }</style>
   </head>
 
@@ -42,56 +42,112 @@
             <h2>Temporary - no token requirement</h2>
             <section>
                 <h2>GET - `/api/users/testcall` </h2>
+                <p>gets a list of users</p>
                 <h3>response: [users] </h3>
             </section>
             <section>
                 <h2>GET = `/api/lines/testcall`</h2>
+                <p>gets a list of all lines</p>
                 <h3>response: [lines]</h3>
             </section>
             <section>
                 <h2>GET - `/api/lines/testcall/YYYY-MM-DD</h2>
-                <h3>response: [lines]</h3>
+                <p>gets a line by date</p>
+                <h3>response: {line,date,id,img_url}</h3>
             </section>
             <section>
                 <h2>POST - `/api/lines/testcall`</h2>
+                <p>posts a new line, will fail if a line for the date exists for that user_id</p>
                 <h3>required body: {user_id, line, date(YYYY-MM-DD)}</h3>
             </section>
         </section>
-        <h3>Note: Authorization tokens last 60minutes.</h3>
+        <section>
+            <h2>- USERS ROUTES -</h2>
+            <h3>Note: Authorization tokens last 60minutes.</h3>
+        
+        
         <section>
             <h2>POST - `/api/users/register` -</h2>
+            <p>register an account</p>
             <h3>required body: {username, email, password}</h3>
             <h3>response: {message, id, token}</h3>   
         </section>
 
         <section>
             <h2>POST - `/api/users/login` -</h2>
+            <p>login and get a token</p>
             <h3>required body: {username, password}</h3>
             <h3>response: {message, username, token}</h3>
             <p>    note: username key will work with both matching username or email value for account.</p>
         </section>
 
         <section>
-           <h2> GET - `/api/lines` -</h2>
+            <h2>PATCH - `/api/users` -</h2>
+            <p>update a users info</p>
+               <h3>required headers: {Authorization: token}</h3> 
+                <h3>required body: {(optional: username, password, name, email)}</h3>   
+        </section>
+
+        <section>
+            <h2>DELETE = `/api/users` -</h2>
+            <p>delete user and corresponding lines</p>
             <h3>required headers: {Authorization: token}</h3>
-            <h3>Response: {lines: [ {line, date, id} ] }</h3>
+            <h3>response: {message}</h3>
+
+
+        </section>
+
+    </section>
+
+    <section>
+        <h2>- LINES ROUTES -</h2>
+    
+        <section>
+           <h2> GET - `/api/lines` -</h2>
+           <p>get all lines of user on token</p>
+            <h3>required headers: {Authorization: token}</h3>
+            <h3>Response: [ lines ] </h3>
         </section>
 
         <section>
             <h2>GET - `/api/lines/YYYY-MM-DD` -</h2>
+            <p>get line by date (please use leading 0s for days/months 1-9</p>
                 <h3>required headers: {Authorization: token}</h3>
                 <h3>Response: {line, date, id}</h3>
                 
-            <p>note: (please use leading 0s for days/months 1-9)</p>
+        </section>
+
+        <section>
+            <h2>GET - `/api/lines/month/MM/year/YYYY`-</h2>
+            <p>get array of lines matching the month and year</p>
+            <h3>required headers: {Authorization: token}</h3>
+            <h3>Response: [ lines ]</h3>
         </section>
 
         <section>
                 <h2>POST - `/api/lines` -</h2>
+                <p>add new line for user on token</p>
                 <h3>required headers: {Authorization: token}</h3>
                 <h3>required body: {line, date: 'YYYY-MM-DD' }</h3>
                 <h3>response: {message, id}</h3>
         </section>
 
+        <section>
+            <h2>PATCH - `/api/lines` -</h2>
+            <p>update a line's information</p>
+            <h3>required headers: {Authoerization: token}</h3>
+            <h3>required body: {id, (optional: line, date, img_url)}</h3>
+            <h3>response: {updatedLine}</h3>
+        </section>
+
+        <section>
+                <h2>DELETE - `/api/lines` -</h2>
+                <p>deletes line of specified id</p>
+                <h3>required headers: required headers: {Authoerization: token}</h3>
+                <h3>required body: {id}</h3>
+                <h3>response: {message}</h3>
+        </section>
+    </section>
     </section>
     
     <section>
@@ -105,6 +161,7 @@
                 <h3>username: TestUser1</h3>
                 <h3>email: 'fake@fake.fake'</h3>
                 <h3>password: 'pass'</h3>
+                <h3>-----------------</h3>
             </section>
 
             <section>

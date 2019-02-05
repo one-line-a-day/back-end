@@ -3,6 +3,8 @@ Server is UP and running at:
 
 Endpoints:
 
+- USERS -
+
 POST - `/api/users/register` -
 required body: {username, email, password}
 response: {message, id, token}
@@ -13,9 +15,20 @@ response: {message, username, token}
 
     note: username key will work with both matching username or email value for account.
 
+PATCH - `/api/users` -
+required headers: {Authorization: token},
+required body: {(optional: username, password, name, email)}
+
+DELETE = `/api/users` -
+required headers: {Authorization: token}
+response: {message}
+note: deleting a user deletes all corresponding lines.
+
+- LINES -
+
 GET - `/api/lines` -
 required headers: {Authorization: token}
-Response: {lines: [ {line, date, id} ] }
+Response: [ {line, date, id, img_url} ]
 
 GET - `/api/lines/YYYY-MM-DD` -
 required headers: {Authorization: token}
@@ -23,10 +36,24 @@ Response: {line, date, id}
 
     note: (please use leading 0s for days/months 1-9)
 
+GET - `/api/lines/month/MM/year/YYYY`
+required headers: {Authorization: token}
+Response: [ lines ]
+
 POST - `/api/lines` -
 required headers: {Authorization: token},
 required body: {line, date: 'YYYY-MM-DD' },
 response: {message, id}
+
+PATCH - `/api/lines` -
+required headers: {Authoerization: token},
+required body: {id, (optional: line and/or date)}
+response: {updatedLine}
+
+DELETE - `/api/lines` -
+required headers: required headers: {Authoerization: token}
+required body: {id}
+response: {message}
 
 EXISTING DATA:
 
