@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 const router = express.Router();
 const db = require("../../../data/dbConfig");
@@ -6,17 +8,7 @@ const auth = require("../../auth/auth");
 
 //middleware functions
 
-//routes
-router.get("/", auth.authenticate, async (req, res) => {
-  let lines = await db("lines")
-    .join("users", "users.id", "=", "lines.user_id")
-    .where({ "users.username": req.decoded.username })
-    .select("line", "date", "lines.id", "img_url");
-
-  res.status(200).json(lines);
-});
-
-//------TEST CALLS TO REMOVE:
+//------TEST ROUTES TO REMOVE:
 router.get("/testcall", async (req, res) => {
   let lines = await db("lines");
   res.status(200).json(lines);
@@ -41,23 +33,16 @@ router.get("/who-am-i", auth.authenticate, async (req, res) => {
   let username = req.decoded.username;
   res.status(200).json({ username });
 });
-//--------
+//----------END Testing/Development Routes
+//routes
+router.get("/", auth.authenticate, async (req, res) => {
+  let lines = await db("lines")
+    .join("users", "users.id", "=", "lines.user_id")
+    .where({ "users.username": req.decoded.username })
+    .select("line", "date", "lines.id", "img_url");
 
-// TODO - get route for 10yr history by date
-// router.get("/history/:date", auth.authenticate, async (req, res) => {
-//   let dateArr = req.params.date.split("-");
-//   let year = dateArr.shift();
-//   let monthAndDay = dateArr.join("-");
-//   let datesToFind = [];
-
-//   let lines = await db("lines")
-//     .join("users", "users.id", "=", "lines.user_id")
-//     .where({ "users.username": req.decoded.username })
-//     .whereIn("lines.date", [monthAndDay])
-//     .select("line", "date", "lines.id");
-
-//   res.status(200).json(lines);
-// });
+  res.status(200).json(lines);
+});
 
 router.get("/:date", auth.authenticate, async (req, res) => {
   let lines = await db("lines")
