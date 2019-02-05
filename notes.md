@@ -33,6 +33,11 @@ required headers: {Authoerization: token},
 required body: {id, (optional: line and/or date)}
 response: {updatedLine}
 
+DELETE - `/api/lines` -
+required headers: required headers: {Authoerization: token}
+required body: {id}
+response: {message}
+
 EXISTING DATA:
 
     Test Users:
