@@ -3,6 +3,8 @@ Server is UP and running at:
 
 Endpoints:
 
+- USERS -
+
 POST - `/api/users/register` -
 required body: {username, email, password}
 response: {message, id, token}
@@ -16,6 +18,13 @@ response: {message, username, token}
 PATCH - `/api/users` -
 required headers: {Authorization: token},
 required body: {(optional: username, password, name, email)}
+
+DELETE = `/api/users` -
+required headers: {Authorization: token}
+response: {message}
+note: deleting a user deletes all corresponding lines.
+
+- LINES -
 
 GET - `/api/lines` -
 required headers: {Authorization: token}

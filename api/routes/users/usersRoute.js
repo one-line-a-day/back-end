@@ -1,9 +1,10 @@
+//supertest breaks down if dotenv not included here for JWT secret
 require("dotenv").config();
 
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+
 const db = require("../../../data/dbConfig");
 const auth = require("../../auth/auth");
 //middleware functions
@@ -88,6 +89,7 @@ router.get("/testcall", async (req, res) => {
   res.status(200).json(users);
 });
 
+//TODO - check bad body data. error try to change user ID
 router.patch("/", auth.authenticate, async (req, res) => {
   let userID = await db("users")
     .where({ username: req.decoded.username })
@@ -106,8 +108,27 @@ router.patch("/", auth.authenticate, async (req, res) => {
     .where({ id: userID })
     .select("username", "email", "name")
     .first();
-  // let user = await db('users').where({ })
+
   res.status(200).json(updatedUser);
+});
+
+router.delete("/", auth.authenticate, async (req, res) => {
+  let userID = await db("users")
+    .where({ username: req.decoded.username })
+    .first();
+  userID = userID.id;
+
+  await db("users")
+    .where({ id: userID })
+    .del();
+
+  await db("lines")
+    .where({ user_id: userID })
+    .del();
+
+  res
+    .status(200)
+    .json({ message: `user and corresponding entries successfully deleted` });
 });
 
 module.exports = router;
