@@ -57,7 +57,11 @@
                 <h3>required body: {user_id, line, date(YYYY-MM-DD)}</h3>
             </section>
         </section>
-        <h3>Note: Authorization tokens last 60minutes.</h3>
+        <section>
+            <h2>- USERS ROUTES -</h2>
+            <h3>Note: Authorization tokens last 60minutes.</h3>
+        
+        
         <section>
             <h2>POST - `/api/users/register` -</h2>
             <h3>required body: {username, email, password}</h3>
@@ -71,6 +75,17 @@
             <p>    note: username key will work with both matching username or email value for account.</p>
         </section>
 
+        <section>
+            <h2>PATCH - `/api/users` -</h2>
+               <h3>required headers: {Authorization: token}</h3> 
+                <h3>required body: {(optional: username, password, name, email)}</h3>   
+        </section>
+
+    </section>
+
+    <section>
+        <h2>- LINES ROUTES -</h2>
+    
         <section>
            <h2> GET - `/api/lines` -</h2>
             <h3>required headers: {Authorization: token}</h3>
@@ -105,7 +120,7 @@
                 <h3>required body: {id}</h3>
                 <h3>response: {message}</h3>
         </section>
-
+    </section>
     </section>
     
     <section>

@@ -1,30 +1,31 @@
 const express = require("express");
 const router = express.Router();
-const jwt = require("jsonwebtoken");
+// const jwt = require("jsonwebtoken");
 const db = require("../../../data/dbConfig");
 
-const jwtKey = process.env.JWT_SECRET;
+const auth = require("../../auth/auth");
+// const jwtKey = process.env.JWT_SECRET;
 //middleware functions
-function authenticate(req, res, next) {
-  const token = req.get("Authorization");
+// function auth.authenticate(req, res, next) {
+//   const token = req.get("Authorization");
 
-  if (token) {
-    jwt.verify(token, jwtKey, (err, decoded) => {
-      if (err) return res.status(401).json(err);
+//   if (token) {
+//     jwt.verify(token, jwtKey, (err, decoded) => {
+//       if (err) return res.status(401).json(err);
 
-      req.decoded = decoded;
+//       req.decoded = decoded;
 
-      next();
-    });
-  } else {
-    return res.status(401).json({
-      error: "No token provided, must be set on the Authorization Header"
-    });
-  }
-}
+//       next();
+//     });
+//   } else {
+//     return res.status(401).json({
+//       error: "No token provided, must be set on the Authorization Header"
+//     });
+//   }
+// }
 
 //routes
-router.get("/", authenticate, async (req, res) => {
+router.get("/", auth.authenticate, async (req, res) => {
   let lines = await db("lines")
     .join("users", "users.id", "=", "lines.user_id")
     .where({ "users.username": req.decoded.username })
@@ -54,14 +55,14 @@ router.get("/testcall/:date", async (req, res) => {
   res.status(200).json(lines);
 });
 
-router.get("/who-am-i", authenticate, async (req, res) => {
+router.get("/who-am-i", auth.authenticate, async (req, res) => {
   let username = req.decoded.username;
   res.status(200).json({ username });
 });
 //--------
 
 // TODO - get route for 10yr history by date
-// router.get("/history/:date", authenticate, async (req, res) => {
+// router.get("/history/:date", auth.authenticate, async (req, res) => {
 //   let dateArr = req.params.date.split("-");
 //   let year = dateArr.shift();
 //   let monthAndDay = dateArr.join("-");
@@ -76,7 +77,7 @@ router.get("/who-am-i", authenticate, async (req, res) => {
 //   res.status(200).json(lines);
 // });
 
-router.get("/:date", authenticate, async (req, res) => {
+router.get("/:date", auth.authenticate, async (req, res) => {
   let lines = await db("lines")
     .join("users", "users.id", "=", "lines.user_id")
     .where({ "users.username": req.decoded.username })
@@ -88,7 +89,7 @@ router.get("/:date", authenticate, async (req, res) => {
 });
 
 //todo handle if line for date already exists
-router.post("/", authenticate, async (req, res) => {
+router.post("/", auth.authenticate, async (req, res) => {
   //todo just put userID on the token...
   let { id } = await db("users")
     .where({ username: req.decoded.username })
@@ -102,7 +103,7 @@ router.post("/", authenticate, async (req, res) => {
 });
 
 //todo handle bad request info
-router.patch("/", authenticate, async (req, res) => {
+router.patch("/", auth.authenticate, async (req, res) => {
   let userID = await db("users")
     .where({ username: req.decoded.username })
     .first();
@@ -129,7 +130,7 @@ router.patch("/", authenticate, async (req, res) => {
   }
 });
 
-router.delete("/", authenticate, async (req, res) => {
+router.delete("/", auth.authenticate, async (req, res) => {
   let userID = await db("users")
     .where({ username: req.decoded.username })
     .first();

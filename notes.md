@@ -13,6 +13,10 @@ response: {message, username, token}
 
     note: username key will work with both matching username or email value for account.
 
+PATCH - `/api/users` -
+required headers: {Authorization: token},
+required body: {(optional: username, password, name, email)}
+
 GET - `/api/lines` -
 required headers: {Authorization: token}
 Response: {lines: [ {line, date, id} ] }
