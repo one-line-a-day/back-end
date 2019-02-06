@@ -19,7 +19,6 @@ server.get("/", (req, res) => {
     root: __dirname + "/docs/"
   };
   res.sendFile("docs.html", options);
-  //   res.sendFile("index.css", options);
 });
 
 module.exports = server;
