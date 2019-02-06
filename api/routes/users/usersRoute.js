@@ -7,6 +7,19 @@ const bcrypt = require("bcryptjs");
 
 const db = require("../../../data/dbConfig");
 const auth = require("../../auth/auth");
+
+//routes
+router.post(
+  "/register",
+  checkRegistration,
+  checkNameAndEmail,
+  hashPassword,
+  insertUser
+);
+router.post("/login", checkLogin, findUser, checkPassword, logIn);
+router.patch("/:id", auth.authenticate, checkIdParam, hashPassword, updateUser);
+router.delete("/:id", auth.authenticate, checkIdParam, deleteUserAndLines);
+
 //middleware functions
 function checkRegistration(req, res, next) {
   if (!req.body.username || !req.body.email || !req.body.password) {
@@ -19,7 +32,9 @@ function checkRegistration(req, res, next) {
 }
 
 function hashPassword(req, res, next) {
-  req.body.password = bcrypt.hashSync(req.body.password, 12);
+  if (req.body.password) {
+    req.body.password = bcrypt.hashSync(req.body.password, 12);
+  }
   next();
 }
 
@@ -62,9 +77,29 @@ function checkPassword(req, res, next) {
   }
 }
 
-// routes
+async function checkNameAndEmail(req, res, next) {
+  try {
+    let name = await db("users")
+      .where({ username: req.body.username })
+      .first();
 
-router.post("/register", checkRegistration, hashPassword, async (req, res) => {
+    let email = await db("users")
+      .where({ email: req.body.email })
+      .first();
+
+    if (name) {
+      res.status(400).json({ message: "username taken" });
+    } else if (email) {
+      res.status(400).json({ message: "email taken" });
+    } else {
+      next();
+    }
+  } catch (err) {
+    res.status(500).json(err);
+  }
+}
+
+async function insertUser(req, res, next) {
   try {
     let ids = await db("users").insert(req.body);
 
@@ -80,9 +115,9 @@ router.post("/register", checkRegistration, hashPassword, async (req, res) => {
   } catch (err) {
     res.status(500).json(err);
   }
-});
+}
 
-router.post("/login", checkLogin, findUser, checkPassword, async (req, res) => {
+async function logIn(req, res, next) {
   try {
     if (req.user) {
       let token = auth.generateToken(req.user);
@@ -93,35 +128,34 @@ router.post("/login", checkLogin, findUser, checkPassword, async (req, res) => {
   } catch (err) {
     res.status(500).json(err);
   }
-});
+}
 
-router.get("/testcall", async (req, res) => {
-  try {
-    let users = await db("users");
-    res.status(200).json(users);
-  } catch (err) {
-    res.status(500).json(err);
-  }
-});
-
-//TODO - check bad body data. error try to change user ID
-router.patch("/", auth.authenticate, async (req, res) => {
+async function checkIdParam(req, res, next) {
   try {
     let userID = await db("users")
       .where({ username: req.decoded.username })
       .first();
     userID = userID.id;
-
-    if (req.body.password) {
-      req.body.password = bcrypt.hashSync(req.body.password, 12);
+    if (Number(req.params.id) !== userID) {
+      res.status(404).json({
+        message: "you may only update/delete yourself"
+      });
+    } else {
+      next();
     }
+  } catch (err) {
+    res.status(500).json(err);
+  }
+}
 
+async function updateUser(req, res, next) {
+  try {
     await db("users")
       .where({ username: req.decoded.username })
       .update(req.body);
 
     let updatedUser = await db("users")
-      .where({ id: userID })
+      .where({ id: req.params.id })
       .select("username", "email", "name")
       .first();
 
@@ -129,26 +163,30 @@ router.patch("/", auth.authenticate, async (req, res) => {
   } catch (err) {
     res.status(500).json(err);
   }
-});
+}
 
-router.delete("/", auth.authenticate, async (req, res) => {
+async function deleteUserAndLines(req, res, next) {
   try {
-    let userID = await db("users")
-      .where({ username: req.decoded.username })
-      .first();
-    userID = userID.id;
-
     await db("users")
-      .where({ id: userID })
+      .where({ id: req.params.id })
       .del();
 
     await db("lines")
-      .where({ user_id: userID })
+      .where({ user_id: req.params.id })
       .del();
 
     res
       .status(200)
       .json({ message: `user and corresponding entries successfully deleted` });
+  } catch (err) {
+    res.status(500).json(err);
+  }
+}
+//TO REMOVE - For testing
+router.get("/testcall", async (req, res) => {
+  try {
+    let users = await db("users");
+    res.status(200).json(users);
   } catch (err) {
     res.status(500).json(err);
   }
