@@ -36,16 +36,29 @@ router.get("/who-am-i", auth.authenticate, async (req, res) => {
 //----------END Testing/Development Routes
 
 //routes
-router.get("/", auth.authenticate, async (req, res) => {
+router.get("/", auth.authenticate, getUsersLines);
+router.get("/:date", auth.authenticate, getLinesByDate);
+router.get("/month/:month/year/:year", auth.authenticate, getLinesByMonthYear);
+router.post("/", auth.authenticate, checkDate, addLine);
+router.patch(
+  "/",
+  auth.authenticate,
+  checkLineExists,
+  checkDate,
+  checkOwner,
+  updateLine
+);
+
+async function getUsersLines(req, res, next) {
   let lines = await db("lines")
     .join("users", "users.id", "=", "lines.user_id")
     .where({ "users.username": req.decoded.username })
     .select("line", "date", "lines.id", "img_url");
 
   res.status(200).json(lines);
-});
+}
 
-router.get("/:date", auth.authenticate, async (req, res) => {
+async function getLinesByDate(req, res, next) {
   let lines = await db("lines")
     .join("users", "users.id", "=", "lines.user_id")
     .where({ "users.username": req.decoded.username })
@@ -54,9 +67,9 @@ router.get("/:date", auth.authenticate, async (req, res) => {
     .first();
 
   res.status(200).json(lines);
-});
+}
 
-router.get("/month/:month/year/:year", auth.authenticate, async (req, res) => {
+async function getLinesByMonthYear(req, res, next) {
   let lines = await db("lines")
     .join("users", "users.id", "=", "lines.user_id")
     .where({ "users.username": req.decoded.username })
@@ -64,12 +77,14 @@ router.get("/month/:month/year/:year", auth.authenticate, async (req, res) => {
     .andWhereRaw(`strftime('%Y', date) = ?`, [req.params.year])
     .select("line", "date", "lines.id", "img_url");
   res.status(200).json(lines);
-});
+}
 
 async function checkDate(req, res, next) {
   let checkLine = await db("lines")
     .join("users", "users.id", "=", "lines.user_id")
     .where({ "lines.date": req.body.date })
+    // COME BACK TO HERE. ADDED LINE BELOW, PAUSE TO HELP OTHERS
+    .where({ "users.name": req.decoded.username })
     .first();
 
   if (checkLine) {
@@ -79,8 +94,8 @@ async function checkDate(req, res, next) {
   }
 }
 
-router.post("/", auth.authenticate, checkDate, async (req, res) => {
-  //todo just put userID on the token...
+async function addLine(req, res, next) {
+  // could put ID on token instead....
   let { id } = await db("users")
     .where({ username: req.decoded.username })
     .first();
@@ -90,7 +105,7 @@ router.post("/", auth.authenticate, checkDate, async (req, res) => {
   res
     .status(201)
     .json({ message: "line created successfully", id: lineIDs[0] });
-});
+}
 
 async function checkLineExists(req, res, next) {
   let checkLine = await db("lines")
@@ -120,25 +135,17 @@ async function checkOwner(req, res, next) {
   }
 }
 
-router.patch(
-  "/",
-  auth.authenticate,
-  checkLineExists,
-  checkDate,
-  checkOwner,
-  async (req, res) => {
-    await db("lines")
-      .where({ id: req.body.id })
-      .update(req.body);
+async function updateLine(req, res, next) {
+  await db("lines")
+    .where({ id: req.body.id })
+    .update(req.body);
 
-    let updatedLine = await db("lines")
-      .where({ id: req.body.id })
-      .first();
+  let updatedLine = await db("lines")
+    .where({ id: req.body.id })
+    .first();
 
-    res.status(200).json(updatedLine);
-    // }
-  }
-);
+  res.status(200).json(updatedLine);
+}
 
 router.delete(
   "/",
