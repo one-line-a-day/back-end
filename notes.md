@@ -45,14 +45,13 @@ required headers: {Authorization: token},
 required body: {line, date: 'YYYY-MM-DD' },
 response: {message, id}
 
-PATCH - `/api/lines` -
+PATCH - `/api/lines/:id` -
 required headers: {Authoerization: token},
-required body: {id, (optional: line and/or date)}
+required body: {(optional: line and/or date)}
 response: {updatedLine}
 
-DELETE - `/api/lines` -
+DELETE - `/api/lines/:id` -
 required headers: required headers: {Authoerization: token}
-required body: {id}
 response: {message}
 
 EXISTING DATA:

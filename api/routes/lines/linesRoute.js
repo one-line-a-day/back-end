@@ -41,7 +41,7 @@ router.get("/:date", auth.authenticate, getLinesByDate);
 router.get("/month/:month/year/:year", auth.authenticate, getLinesByMonthYear);
 router.post("/", auth.authenticate, checkDate, addLine);
 router.patch(
-  "/",
+  "/:id",
   auth.authenticate,
   checkLineExists,
   checkDate,
@@ -83,7 +83,6 @@ async function checkDate(req, res, next) {
   let checkLine = await db("lines")
     .join("users", "users.id", "=", "lines.user_id")
     .where({ "lines.date": req.body.date })
-    // COME BACK TO HERE. ADDED LINE BELOW, PAUSE TO HELP OTHERS
     .where({ "users.name": req.decoded.username })
     .first();
 
@@ -109,14 +108,14 @@ async function addLine(req, res, next) {
 
 async function checkLineExists(req, res, next) {
   let checkLine = await db("lines")
-    .where({ id: req.body.id })
+    .where({ id: req.params.id })
     .first();
 
   if (checkLine) {
     req.lineInfo = checkLine;
     next();
   } else {
-    res.status(404).json({ message: `line by id: ${req.body.id} not found` });
+    res.status(404).json({ message: `line by id: ${req.params.id} not found` });
   }
 }
 
@@ -137,24 +136,24 @@ async function checkOwner(req, res, next) {
 
 async function updateLine(req, res, next) {
   await db("lines")
-    .where({ id: req.body.id })
+    .where({ id: req.params.id })
     .update(req.body);
 
   let updatedLine = await db("lines")
-    .where({ id: req.body.id })
+    .where({ id: req.params.id })
     .first();
 
   res.status(200).json(updatedLine);
 }
 
 router.delete(
-  "/",
+  "/:id",
   auth.authenticate,
   checkLineExists,
   checkOwner,
   async (req, res) => {
     await db("lines")
-      .where({ id: req.body.id })
+      .where({ id: req.params.id })
       .del();
 
     res.status(200).json({ message: "line deleted successfully" });
