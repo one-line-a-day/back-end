@@ -34,21 +34,24 @@ function checkLogin(req, res, next) {
 }
 
 async function findUser(req, res, next) {
-  let user = await db("users")
-    .where({ username: req.body.username })
-    .first();
-
-  if (!user) {
-    user = await db("users")
-      .where({ email: req.body.username })
+  try {
+    let user = await db("users")
+      .where({ username: req.body.username })
       .first();
-    if (!user) {
-      res.status(404).json({ message: "user not found" });
-    }
-  }
 
-  req.user = user;
-  next();
+    if (!user) {
+      user = await db("users")
+        .where({ email: req.body.username })
+        .first();
+      if (!user) {
+        res.status(404).json({ message: "user not found" });
+      }
+    }
+    req.user = user;
+    next();
+  } catch (err) {
+    res.status(400).json(err);
+  }
 }
 
 function checkPassword(req, res, next) {
@@ -62,73 +65,93 @@ function checkPassword(req, res, next) {
 // routes
 
 router.post("/register", checkRegistration, hashPassword, async (req, res) => {
-  let ids = await db("users").insert(req.body);
+  try {
+    let ids = await db("users").insert(req.body);
 
-  let user = await db("users")
-    .where({ id: ids[0] })
-    .first();
+    let user = await db("users")
+      .where({ id: ids[0] })
+      .first();
 
-  let token = auth.generateToken(user);
+    let token = auth.generateToken(user);
 
-  res
-    .status(201)
-    .json({ message: "Successfully created new User", id: ids[0], token });
+    res
+      .status(201)
+      .json({ message: "Successfully created new User", id: ids[0], token });
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
 router.post("/login", checkLogin, findUser, checkPassword, async (req, res) => {
-  if (req.user) {
-    let token = auth.generateToken(req.user);
-    res
-      .status(200)
-      .json({ message: "login success", username: req.user.username, token });
+  try {
+    if (req.user) {
+      let token = auth.generateToken(req.user);
+      res
+        .status(200)
+        .json({ message: "login success", username: req.user.username, token });
+    }
+  } catch (err) {
+    res.status(500).json(err);
   }
 });
 
 router.get("/testcall", async (req, res) => {
-  let users = await db("users");
-  res.status(200).json(users);
+  try {
+    let users = await db("users");
+    res.status(200).json(users);
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
 //TODO - check bad body data. error try to change user ID
 router.patch("/", auth.authenticate, async (req, res) => {
-  let userID = await db("users")
-    .where({ username: req.decoded.username })
-    .first();
-  userID = userID.id;
+  try {
+    let userID = await db("users")
+      .where({ username: req.decoded.username })
+      .first();
+    userID = userID.id;
 
-  if (req.body.password) {
-    req.body.password = bcrypt.hashSync(req.body.password, 12);
+    if (req.body.password) {
+      req.body.password = bcrypt.hashSync(req.body.password, 12);
+    }
+
+    await db("users")
+      .where({ username: req.decoded.username })
+      .update(req.body);
+
+    let updatedUser = await db("users")
+      .where({ id: userID })
+      .select("username", "email", "name")
+      .first();
+
+    res.status(200).json(updatedUser);
+  } catch (err) {
+    res.status(500).json(err);
   }
-
-  await db("users")
-    .where({ username: req.decoded.username })
-    .update(req.body);
-
-  let updatedUser = await db("users")
-    .where({ id: userID })
-    .select("username", "email", "name")
-    .first();
-
-  res.status(200).json(updatedUser);
 });
 
 router.delete("/", auth.authenticate, async (req, res) => {
-  let userID = await db("users")
-    .where({ username: req.decoded.username })
-    .first();
-  userID = userID.id;
+  try {
+    let userID = await db("users")
+      .where({ username: req.decoded.username })
+      .first();
+    userID = userID.id;
 
-  await db("users")
-    .where({ id: userID })
-    .del();
+    await db("users")
+      .where({ id: userID })
+      .del();
 
-  await db("lines")
-    .where({ user_id: userID })
-    .del();
+    await db("lines")
+      .where({ user_id: userID })
+      .del();
 
-  res
-    .status(200)
-    .json({ message: `user and corresponding entries successfully deleted` });
+    res
+      .status(200)
+      .json({ message: `user and corresponding entries successfully deleted` });
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
 module.exports = router;
