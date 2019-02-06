@@ -34,6 +34,7 @@ router.get("/who-am-i", auth.authenticate, async (req, res) => {
   res.status(200).json({ username });
 });
 //----------END Testing/Development Routes
+
 //routes
 router.get("/", auth.authenticate, async (req, res) => {
   let lines = await db("lines")
@@ -64,8 +65,21 @@ router.get("/month/:month/year/:year", auth.authenticate, async (req, res) => {
     .select("line", "date", "lines.id", "img_url");
   res.status(200).json(lines);
 });
-//todo handle if line for date already exists
-router.post("/", auth.authenticate, async (req, res) => {
+
+async function checkDate(req, res, next) {
+  let checkLine = await db("lines")
+    .join("users", "users.id", "=", "lines.user_id")
+    .where({ "lines.date": req.body.date })
+    .first();
+
+  if (checkLine) {
+    res.status(400).json({ message: "line for this date already exists" });
+  } else {
+    next();
+  }
+}
+
+router.post("/", auth.authenticate, checkDate, async (req, res) => {
   //todo just put userID on the token...
   let { id } = await db("users")
     .where({ username: req.decoded.username })
@@ -78,22 +92,47 @@ router.post("/", auth.authenticate, async (req, res) => {
     .json({ message: "line created successfully", id: lineIDs[0] });
 });
 
-//todo handle bad request info
-router.patch("/", auth.authenticate, async (req, res) => {
+async function checkLineExists(req, res, next) {
+  let checkLine = await db("lines")
+    .where({ id: req.body.id })
+    .first();
+
+  if (checkLine) {
+    req.lineInfo = checkLine;
+    next();
+  } else {
+    res.status(404).json({ message: `line by id: ${req.body.id} not found` });
+  }
+}
+
+async function checkOwner(req, res, next) {
   let userID = await db("users")
     .where({ username: req.decoded.username })
     .first();
   userID = userID.id;
 
-  let line = await db("lines")
-    .where({ id: req.body.id })
-    .first();
-
-  if (line.user_id !== userID) {
+  if (req.lineInfo.user_id !== userID) {
     res
       .status(401)
       .json({ message: `access denied: line does not belong to user` });
   } else {
+    next();
+  }
+}
+
+//todo handle bad request info
+router.patch(
+  "/",
+  auth.authenticate,
+  checkLineExists,
+  checkDate,
+  checkOwner,
+  async (req, res) => {
+    // if (req.lineInfo.user_id !== userID) {
+    //   res
+    //     .status(401)
+    //     .json({ message: `access denied: line does not belong to user` });
+    // } else {
     await db("lines")
       .where({ id: req.body.id })
       .update(req.body);
@@ -103,8 +142,9 @@ router.patch("/", auth.authenticate, async (req, res) => {
       .first();
 
     res.status(200).json(updatedLine);
+    // }
   }
-});
+);
 
 router.delete("/", auth.authenticate, async (req, res) => {
   let userID = await db("users")
