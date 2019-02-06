@@ -6,26 +6,7 @@ const server = express();
 const usersRoute = require("./routes/users/usersRoute");
 const linesRoute = require("./routes/lines/linesRoute");
 
-const enableCors = function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET,PUT,PATCH,POST,DELETE");
-  res.header("Access-Control-Allow-Headers", "Content-Type");
-  next();
-};
-
-const corsOptions = {
-  origin: function(origin, callback) {
-    if (!origin) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
-};
-
-server.use(enableCors);
-server.use(cors(corsOptions));
+server.use(cors());
 server.use(helmet());
 server.use(express.json());
 server.use(morgan("short"));
