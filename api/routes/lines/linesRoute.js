@@ -120,7 +120,6 @@ async function checkOwner(req, res, next) {
   }
 }
 
-//todo handle bad request info
 router.patch(
   "/",
   auth.authenticate,
@@ -128,11 +127,6 @@ router.patch(
   checkDate,
   checkOwner,
   async (req, res) => {
-    // if (req.lineInfo.user_id !== userID) {
-    //   res
-    //     .status(401)
-    //     .json({ message: `access denied: line does not belong to user` });
-    // } else {
     await db("lines")
       .where({ id: req.body.id })
       .update(req.body);
@@ -146,28 +140,19 @@ router.patch(
   }
 );
 
-router.delete("/", auth.authenticate, async (req, res) => {
-  let userID = await db("users")
-    .where({ username: req.decoded.username })
-    .first();
-  userID = userID.id;
-
-  let line = await db("lines")
-    .where({ id: req.body.id })
-    .first();
-
-  if (line.user_id !== userID) {
-    res
-      .status(401)
-      .json({ message: "access denied: line does not belong to user" });
-  } else {
+router.delete(
+  "/",
+  auth.authenticate,
+  checkLineExists,
+  checkOwner,
+  async (req, res) => {
     await db("lines")
       .where({ id: req.body.id })
       .del();
 
     res.status(200).json({ message: "line deleted successfully" });
   }
-});
+);
 
 //query routes to add search functionality
 
