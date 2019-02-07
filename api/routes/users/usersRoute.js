@@ -125,9 +125,13 @@ async function logIn(req, res, next) {
   try {
     if (req.user) {
       let token = auth.generateToken(req.user);
-      res
-        .status(200)
-        .json({ message: "login success", username: req.user.username, token });
+      res.status(200).json({
+        message: "login success",
+        username: req.user.username,
+        token,
+        name: req.user.name,
+        id: req.user.id
+      });
     }
   } catch (err) {
     res.status(500).json(err);

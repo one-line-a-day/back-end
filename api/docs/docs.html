@@ -70,14 +70,14 @@
             <h2>POST - `/api/users/register` -</h2>
             <p>register an account</p>
             <h3>required body: {username, email, password}</h3>
-            <h3>response: {message, id, token}</h3>   
+            <h3>response: {message, id, token, username, name}</h3>   
         </section>
 
         <section>
             <h2>POST - `/api/users/login` -</h2>
             <p>login and get a token</p>
             <h3>required body: {username, password}</h3>
-            <h3>response: {message, username, token}</h3>
+            <h3>response: {message, id, token, username, name}</h3>
             <p>    note: username key will work with both matching username or email value for account.</p>
         </section>
 
@@ -113,7 +113,14 @@
             <h2>GET - `/api/lines/YYYY-MM-DD` -</h2>
             <p>get line by date (please use leading 0s for days/months 1-9</p>
             <h3>required headers: {Authorization: token}</h3>
-            <h3>Response: {line, date, id}</h3>  
+            <h3>Response: {line, date, id, img_url}</h3>  
+        </section>
+
+        <section>
+            <h2>GET - `/api/lines/id/:id` -</h2>
+            <p>get line by date (please use leading 0s for days/months 1-9</p>
+            <h3>required headers: {Authorization: token}</h3>
+            <h3>Response: {line, date, id, img_url}</h3>  
         </section>
 
         <section>

@@ -1,17 +1,14 @@
-Server is UP and running at:
-`https://one-line-a-day-backend.herokuapp.com/`
-
 Endpoints:
 
 - USERS -
 
 POST - `/api/users/register` -
 required body: {username, email, password}
-response: {message, id, token}
+response: {message, id, token, username, name}
 
 POST - `/api/users/login` -
 required body: {username, password}
-response: {message, username, token}
+response: {message, id, token, username, name}
 
     note: username key will work with both matching username or email value for account.
 
@@ -32,9 +29,13 @@ Response: [ {line, date, id, img_url} ]
 
 GET - `/api/lines/YYYY-MM-DD` -
 required headers: {Authorization: token}
-Response: {line, date, id}
+Response: {line, date, id, img_url}
 
     note: (please use leading 0s for days/months 1-9)
+
+GET - `/api/lines/id/:id` -
+required headers: {Authorization: token}
+Response: {line, date, id, img_url}
 
 GET - `/api/lines/month/MM/year/YYYY`
 required headers: {Authorization: token}
