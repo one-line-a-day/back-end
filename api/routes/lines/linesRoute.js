@@ -132,20 +132,24 @@ async function getLinesByMonthYear(req, res, next) {
 }
 
 async function checkDate(req, res, next) {
-  try {
-    let checkLine = await db("lines")
-      .join("users", "users.id", "=", "lines.user_id")
-      .where({ "lines.date": req.body.date })
-      .where({ "users.name": req.decoded.username })
-      .first();
+  if (req.body.date) {
+    try {
+      let checkLine = await db("lines")
+        .join("users", "users.id", "=", "lines.user_id")
+        .where({ "lines.date": req.body.date })
+        .where({ "users.name": req.decoded.username })
+        .first();
 
-    if (checkLine) {
-      res.status(400).json({ message: "line for this date already exists" });
-    } else {
-      next();
+      if (checkLine) {
+        res.status(400).json({ message: "line for this date already exists" });
+      } else {
+        next();
+      }
+    } catch (err) {
+      res.status(500).json(err);
     }
-  } catch (err) {
-    res.status(500).json(err);
+  } else {
+    next();
   }
 }
 
