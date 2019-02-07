@@ -8,6 +8,13 @@ const auth = require("../../auth/auth");
 
 //routes
 router.get("/", auth.authenticate, getUsersLines);
+router.get(
+  "/id/:id",
+  auth.authenticate,
+  checkLineExists,
+  checkOwner,
+  getLineById
+);
 router.get("/:date", auth.authenticate, getLinesByDate);
 router.get("/month/:month/year/:year", auth.authenticate, getLinesByMonthYear);
 router.post("/", auth.authenticate, checkDate, addLine);
@@ -35,6 +42,20 @@ async function getUsersLines(req, res, next) {
       .join("users", "users.id", "=", "lines.user_id")
       .where({ "users.username": req.decoded.username })
       .select("line", "date", "lines.id", "img_url");
+
+    res.status(200).json(lines);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+}
+async function getLineById(req, res, next) {
+  try {
+    let lines = await db("lines")
+      .join("users", "users.id", "=", "lines.user_id")
+      .where({ "users.username": req.decoded.username })
+      .where({ "lines.id": req.params.id })
+      .select("line", "date", "lines.id", "img_url")
+      .first();
 
     res.status(200).json(lines);
   } catch (err) {

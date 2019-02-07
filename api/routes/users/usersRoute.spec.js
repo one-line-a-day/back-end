@@ -3,6 +3,14 @@ const request = require("supertest");
 const server = require("../../server.js");
 
 const db = require("../../../data/dbConfig");
+const auth = require("../../auth/auth");
+const bcrypt = require("bcryptjs");
+
+let newUser = {
+  username: "Bobbie",
+  email: "stuff@dork.awe",
+  password: "pass"
+};
 
 afterEach(async () => {
   await db("users").truncate();
@@ -38,15 +46,9 @@ describe("usersRoute", () => {
       expect(response3.status).toBe(400);
     });
     test("password is hashed", async () => {
-      let body = {
-        username: "SteveTheJeeves",
-        email: "Jeevie@steve.com",
-        password: "pass"
-      };
-
       let response = await request(server)
         .post("/api/users/register")
-        .send(body);
+        .send(newUser);
 
       let user = await db("users")
         .where({ id: response.body.id })
@@ -84,11 +86,6 @@ describe("usersRoute", () => {
       expect(res2.status).toBe(400);
     });
     test("email address sent as username will find appropriate user", async () => {
-      let newUser = {
-        username: "Bobbie",
-        email: "stuff@dork.awe",
-        password: "pass"
-      };
       await request(server)
         .post("/api/users/register")
         .send(newUser);
@@ -108,11 +105,6 @@ describe("usersRoute", () => {
     });
   });
   test("incorrect password should return 401", async () => {
-    let newUser = {
-      username: "Bobbie",
-      email: "stuff@dork.awe",
-      password: "pass"
-    };
     await request(server)
       .post("/api/users/register")
       .send(newUser);
@@ -129,11 +121,6 @@ describe("usersRoute", () => {
     expect(response.status).toBe(401);
   });
   test("successful login returns token", async () => {
-    let newUser = {
-      username: "Bobbie",
-      email: "stuff@dork.awe",
-      password: "pass"
-    };
     await request(server)
       .post("/api/users/register")
       .send(newUser);
@@ -148,5 +135,35 @@ describe("usersRoute", () => {
       .send(goodInfo);
 
     expect(response.body.token).toBeTruthy();
+  });
+
+  describe("Patch user endpoint info", () => {
+    test("should fail without token", async () => {
+      await request(server)
+        .post("/api/users/register")
+        .send(newUser);
+
+      let response = await request(server)
+        .patch("/api/users/1")
+        .send({ email: "somethingElse" });
+
+      expect(response.status).toBe(401);
+    });
+    test("should update info", async () => {
+      let stuff = await request(server)
+        .post("/api/users/register")
+        .send(newUser);
+
+      let token = stuff.body.token;
+
+      let patch = await request(server)
+        .patch("/api/users/1")
+        .send({ email: "something@else.wee" })
+        .set("authorization", token);
+
+      let response = await db("users").first();
+
+      expect(response.email).toEqual("something@else.wee");
+    });
   });
 });
