@@ -10,6 +10,12 @@ let newUser = {
   password: "pass"
 };
 
+let secondUser = {
+  username: "Ralphie",
+  email: "oooops@dang.you",
+  password: "pass"
+};
+
 afterEach(async () => {
   await db("users").truncate();
 });
@@ -188,20 +194,29 @@ describe("usersRoute", () => {
 
       expect(response.status).toBe(401);
     });
-    test("should not allow deleting other user than token owner", async () => {
+    test("should fail delete attempt on user that is not self & 401", async () => {
       let stuff = await request(server)
         .post("/api/users/register")
         .send(newUser);
 
       let token = stuff.body.token;
 
+      await request(server)
+        .post("/api/users/register")
+        .send(secondUser);
+
       let response = await request(server)
         .delete("/api/users/2")
         .set("authorization", token);
 
+      let user2 = await db("users")
+        .where({ id: 2 })
+        .first();
+
       expect(response.status).toEqual(401);
+      expect(user2).toBeTruthy();
     });
-    test("should delete user", async () => {
+    test("should delete user and res 200", async () => {
       let stuff = await request(server)
         .post("/api/users/register")
         .send(newUser);
@@ -212,7 +227,10 @@ describe("usersRoute", () => {
         .delete("/api/users/1")
         .set("authorization", token);
 
+      let user = await db("users").first();
+
       expect(response.status).toEqual(200);
+      expect(user).not.toBeTruthy();
     });
   });
 });
