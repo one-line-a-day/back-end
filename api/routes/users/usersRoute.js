@@ -109,9 +109,13 @@ async function insertUser(req, res, next) {
 
     let token = auth.generateToken(user);
 
-    res
-      .status(201)
-      .json({ message: "Successfully created new User", id: ids[0], token });
+    res.status(201).json({
+      message: "Successfully created new User",
+      id: ids[0],
+      token,
+      username: user.username,
+      name: user.name
+    });
   } catch (err) {
     res.status(500).json(err);
   }

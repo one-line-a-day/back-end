@@ -178,4 +178,41 @@ describe("usersRoute", () => {
       expect(response.status).toEqual(401);
     });
   });
+  describe("delete user", () => {
+    test("should fail without token", async () => {
+      await request(server)
+        .post("/api/users/register")
+        .send(newUser);
+
+      let response = await request(server).delete("/api/users/1");
+
+      expect(response.status).toBe(401);
+    });
+    test("should not allow deleting other user than token owner", async () => {
+      let stuff = await request(server)
+        .post("/api/users/register")
+        .send(newUser);
+
+      let token = stuff.body.token;
+
+      let response = await request(server)
+        .delete("/api/users/2")
+        .set("authorization", token);
+
+      expect(response.status).toEqual(401);
+    });
+    test("should delete user", async () => {
+      let stuff = await request(server)
+        .post("/api/users/register")
+        .send(newUser);
+
+      let token = stuff.body.token;
+
+      let response = await request(server)
+        .delete("/api/users/1")
+        .set("authorization", token);
+
+      expect(response.status).toEqual(200);
+    });
+  });
 });
