@@ -15,11 +15,11 @@ response: {message, username, token}
 
     note: username key will work with both matching username or email value for account.
 
-PATCH - `/api/users` -
+PATCH - `/api/users/:id` -
 required headers: {Authorization: token},
 required body: {(optional: username, password, name, email)}
 
-DELETE = `/api/users` -
+DELETE = `/api/users/:id` -
 required headers: {Authorization: token}
 response: {message}
 note: deleting a user deletes all corresponding lines.
