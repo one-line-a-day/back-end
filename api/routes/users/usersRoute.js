@@ -137,7 +137,7 @@ async function checkIdParam(req, res, next) {
       .first();
     userID = userID.id;
     if (Number(req.params.id) !== userID) {
-      res.status(404).json({
+      res.status(401).json({
         message: "you may only update/delete yourself"
       });
     } else {
