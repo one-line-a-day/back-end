@@ -3,8 +3,6 @@ const request = require("supertest");
 const server = require("../../server.js");
 
 const db = require("../../../data/dbConfig");
-const auth = require("../../auth/auth");
-const bcrypt = require("bcryptjs");
 
 let newUser = {
   username: "Bobbie",
@@ -156,7 +154,7 @@ describe("usersRoute", () => {
 
       let token = stuff.body.token;
 
-      let patch = await request(server)
+      await request(server)
         .patch("/api/users/1")
         .send({ email: "something@else.wee" })
         .set("authorization", token);
@@ -164,6 +162,20 @@ describe("usersRoute", () => {
       let response = await db("users").first();
 
       expect(response.email).toEqual("something@else.wee");
+    });
+    test("should respond 401 if id on token doesnt match param", async () => {
+      let stuff = await request(server)
+        .post("/api/users/register")
+        .send(newUser);
+
+      let token = stuff.body.token;
+
+      let response = await request(server)
+        .patch("/api/users/2")
+        .send({ email: "something@else.wee" })
+        .set("authorization", token);
+
+      expect(response.status).toEqual(401);
     });
   });
 });
